@@ -2,6 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/widget_message"
+        android:visibility="gone"
+        android:textStyle="bold"
+        android:textSize="@dimen/abc_text_size_medium_material"
+        android:padding="4dp"
+        android:text="@string/widget_message_choose_score"
+        />
+
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/pager"
@@ -13,7 +25,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:paddingBottom="4dp"
-            android:paddingTop="4dp" />
-        ></android.support.v4.view.ViewPager>
+            android:paddingTop="4dp"
+            />
+    </android.support.v4.view.ViewPager>
 
 </LinearLayout>

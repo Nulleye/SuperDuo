@@ -1,18 +1,18 @@
 package barqsoft.footballscores;
 
-import android.content.Context;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -24,28 +24,67 @@ public class PagerFragment extends Fragment
     public ViewPager mPagerHandler;
     private myPageAdapter mPagerAdapter;
     private MainScreenFragment[] viewFragments = new MainScreenFragment[5];
+
+    public static final int WORKING_MODE_NORMAL = 0;
+    public static final int WORKING_MODE_CHOOSE_DAY = 1;
+    public static final int WORKING_MODE_CHOOSE_SCORE = 2;
+
+    private int mWorkingMode = WORKING_MODE_NORMAL;
+
+    public int getWorkingMode() { return mWorkingMode; }
+    public void setWorkingMode(int workingMode) { mWorkingMode = workingMode; }
+    boolean rtl = true;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.pager_fragment, container, false);
         mPagerHandler = (ViewPager) rootView.findViewById(R.id.pager);
         mPagerAdapter = new myPageAdapter(getChildFragmentManager());
-        for (int i = 0;i < NUM_PAGES;i++)
-        {
-            Date fragmentdate = new Date(System.currentTimeMillis()+((i-2)*86400000));
-            SimpleDateFormat mformat = new SimpleDateFormat("yyyy-MM-dd");
-            viewFragments[i] = new MainScreenFragment();
-            viewFragments[i].setFragmentDate(mformat.format(fragmentdate));
+
+        int messageId = -1;
+        switch (mWorkingMode) {
+            case WORKING_MODE_CHOOSE_SCORE:
+                messageId = R.string.widget_message_choose_score;
+                break;
+            case WORKING_MODE_CHOOSE_DAY:
+                messageId = R.string.widget_message_choose_day;
+                break;
         }
+        if (messageId != -1) {
+            TextView message = (TextView) rootView.findViewById(R.id.widget_message);
+            if (message != null) {
+                message.setVisibility(View.VISIBLE);
+                message.setText(messageId);
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            Configuration config = getResources().getConfiguration();
+            rtl = (config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+        }
+        for (int i = 0;i < NUM_PAGES;i++) {
+            viewFragments[i] = new MainScreenFragment();
+            if (!rtl)
+                viewFragments[i].setFragmentDate(new Date(System.currentTimeMillis()+((i-2)*86400000)));
+            else
+                viewFragments[i].setFragmentDate(new Date(System.currentTimeMillis() + ((((NUM_PAGES-1)-(i+2)) * 86400000))));
+            viewFragments[i].setWorkingMode(mWorkingMode);
+        }
+
         mPagerHandler.setAdapter(mPagerAdapter);
         mPagerHandler.setCurrentItem(MainActivity.current_fragment);
         return rootView;
     }
+
+
+
+
+
     private class myPageAdapter extends FragmentStatePagerAdapter
     {
         @Override
-        public Fragment getItem(int i)
-        {
+        public Fragment getItem(int i) {
             return viewFragments[i];
         }
 
@@ -63,33 +102,22 @@ public class PagerFragment extends Fragment
         @Override
         public CharSequence getPageTitle(int position)
         {
-            return getDayName(getActivity(),System.currentTimeMillis()+((position-2)*86400000));
-        }
-        public String getDayName(Context context, long dateInMillis) {
-            // If the date is today, return the localized version of "Today" instead of the actual
-            // day name.
-
-            Time t = new Time();
-            t.setToNow();
-            int julianDay = Time.getJulianDay(dateInMillis, t.gmtoff);
-            int currentJulianDay = Time.getJulianDay(System.currentTimeMillis(), t.gmtoff);
-            if (julianDay == currentJulianDay) {
-                return context.getString(R.string.today);
-            } else if ( julianDay == currentJulianDay +1 ) {
-                return context.getString(R.string.tomorrow);
-            }
-             else if ( julianDay == currentJulianDay -1)
-            {
-                return context.getString(R.string.yesterday);
-            }
+            if (!rtl)
+                return Utilies.getDayName(getActivity(),System.currentTimeMillis()+((position-2)*86400000));
             else
-            {
-                Time time = new Time();
-                time.setToNow();
-                // Otherwise, the format is just the day of the week (e.g "Wednesday".
-                SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
-                return dayFormat.format(dateInMillis);
-            }
+                return Utilies.getDayName(getActivity(), System.currentTimeMillis() + (((NUM_PAGES-1)-(position+2)) * 86400000));
         }
+
     }
+
+    public void selectConfiguration(final Utilies.WidgetConfiguration config) {
+        final String date = Utilies.formatDate(config.date);
+        for(int i=0;i<viewFragments.length;i++)
+            if (date.equals(viewFragments[i].getFragmentDateText())) {
+                if (config.scoreId != null)
+                    viewFragments[i].setSelectItemId(config.scoreId);
+                mPagerHandler.setCurrentItem(i);
+            }
+    }
+
 }

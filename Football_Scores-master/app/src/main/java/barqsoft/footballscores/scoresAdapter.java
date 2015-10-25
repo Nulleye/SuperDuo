@@ -1,5 +1,7 @@
 package barqsoft.footballscores;
 
+import android.app.Activity;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,7 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.Date;
+
+import barqsoft.footballscores.widget.ScoreWidget;
 
 /**
  * Created by yehya khaled on 2/26/2015.
@@ -26,9 +33,43 @@ public class scoresAdapter extends CursorAdapter
     public static final int COL_MATCHTIME = 2;
     public double detail_match_id = 0;
     private String FOOTBALL_SCORES_HASHTAG = "#Football_Scores";
-    public scoresAdapter(Context context,Cursor cursor,int flags)
+
+    private Date date = new  Date();
+    public void setDate(final Date date) { this.date = date; }
+
+    private boolean widget_mode = false;
+    public void setWidgetMode(boolean widget_mode) { this.widget_mode = widget_mode; }
+
+
+    /**
+     * Created by yehya khaled on 2/26/2015.
+     */
+    public static class ViewHolder
     {
-        super(context,cursor,flags);
+        public Button widget_select;
+        public TextView home_name;
+        public TextView away_name;
+        public TextView score;
+        public TextView date;
+        public ImageView home_crest;
+        public ImageView away_crest;
+        public double match_id;
+        public ViewHolder(View view)
+        {
+            widget_select = (Button) view.findViewById(R.id.widget_select);
+            home_name = (TextView) view.findViewById(R.id.home_name);
+            away_name = (TextView) view.findViewById(R.id.away_name);
+            score     = (TextView) view.findViewById(R.id.score_textview);
+            date      = (TextView) view.findViewById(R.id.data_textview);
+            home_crest = (ImageView) view.findViewById(R.id.home_crest);
+            away_crest = (ImageView) view.findViewById(R.id.away_crest);
+        }
+    }
+
+
+    public scoresAdapter(Context context, Cursor cursor, int flags)
+    {
+        super(context, cursor, flags);
     }
 
     @Override
@@ -41,14 +82,31 @@ public class scoresAdapter extends CursorAdapter
         return mItem;
     }
 
+
     @Override
-    public void bindView(View view, final Context context, Cursor cursor)
+    public void bindView(View view, final Context context, final Cursor cursor)
     {
         final ViewHolder mHolder = (ViewHolder) view.getTag();
+        if (widget_mode) {
+            mHolder.widget_select.setVisibility(View.VISIBLE);
+            mHolder.widget_select.setOnClickListener(
+                    new View.OnClickListener() {
+
+                        Activity myActivity = (Activity) context;
+                        int myId = cursor.getInt(COL_ID);
+
+                        @Override
+                        public void onClick(View v) {
+                            selectScoreForWidget(myActivity, myId);
+                        }
+                    }
+            );
+        }
+
         mHolder.home_name.setText(cursor.getString(COL_HOME));
         mHolder.away_name.setText(cursor.getString(COL_AWAY));
         mHolder.date.setText(cursor.getString(COL_MATCHTIME));
-        mHolder.score.setText(Utilies.getScores(cursor.getInt(COL_HOME_GOALS),cursor.getInt(COL_AWAY_GOALS)));
+        mHolder.score.setText(Utilies.getScores(cursor.getInt(COL_HOME_GOALS), cursor.getInt(COL_AWAY_GOALS)));
         mHolder.match_id = cursor.getDouble(COL_ID);
         mHolder.home_crest.setImageResource(Utilies.getTeamCrestByTeamName(
                 cursor.getString(COL_HOME)));
@@ -89,6 +147,7 @@ public class scoresAdapter extends CursorAdapter
         }
 
     }
+
     public Intent createShareForecastIntent(String ShareText) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -96,5 +155,20 @@ public class scoresAdapter extends CursorAdapter
         shareIntent.putExtra(Intent.EXTRA_TEXT, ShareText + FOOTBALL_SCORES_HASHTAG);
         return shareIntent;
     }
+
+
+    public void selectScoreForWidget(final Activity activity, final int id) {
+        int widgetId = activity.getIntent().getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            Utilies.writeWidgetConfiguration(activity, Utilies.WIDGET_TYPE_SCORE, widgetId, new Utilies.WidgetConfiguration(date, id));
+            ScoreWidget.updateWidget(activity, AppWidgetManager.getInstance(activity), widgetId);
+            //Put result and finish
+            Intent resultValue = new Intent();
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+            activity.setResult(Activity.RESULT_OK, resultValue);
+            activity.finish();
+        }
+    }
+
 
 }

@@ -178,5 +178,16 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         super.onBackPressed();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ( (requestCode == BarcodeScanner.BARCODE_SCAN) && (resultCode == RESULT_OK)) {
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+            if (fragment instanceof AddBook) {
+                ((AddBook) fragment).processBarcode(data);
+                return;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
 }

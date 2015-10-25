@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:elevation="4dp"
+              android:background="@android:color/background_dark"
+              android:id="@+id/day_text"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:textColor="#ffffff"
+              android:textStyle="bold"
+              android:text="@string/widget_day"
+              android:textSize="20sp"
+        android:padding="2sp"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id = "@+id/scores_list"
+        android:dividerHeight="2sp"
+        android:divider="@android:color/darker_gray"
+        android:elevation="4dp"
+        android:background="@drawable/list_item"
+        />
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:elevation="4dp"
+              android:background="@drawable/list_item"
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:text="@string/widget_day_empty_list"
+        android:textSize="20sp" />
+</LinearLayout>

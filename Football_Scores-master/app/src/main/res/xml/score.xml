@@ -1,0 +1,10 @@
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:resizeMode="none"
+    android:widgetCategory="home_screen"
+    android:minWidth="250dp"
+    android:updatePeriodMillis="300000"
+    android:minHeight="40dp"
+    android:initialLayout="@layout/scores_widget_item"
+    android:configure="barqsoft.footballscores.widget.ScoreWidgetConfiguration">
+</appwidget-provider>

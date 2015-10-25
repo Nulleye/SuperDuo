@@ -1,30 +1,47 @@
 package barqsoft.footballscores;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import barqsoft.footballscores.sync.ScoresSyncAdapter;
+
 public class MainActivity extends ActionBarActivity
 {
+
     public static int selected_match_id;
     public static int current_fragment = 2;
-    public static String LOG_TAG = "MainActivity";
+    public static String LOG_TAG = MainActivity.class.getSimpleName();
     private final String save_tag = "Save Test";
+
     private PagerFragment my_main;
+
+    public PagerFragment getMyMain() { return my_main; }
+
+    protected String getTag() {
+        return LOG_TAG;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(getTag(), "onCreate()");
         setContentView(R.layout.activity_main);
-        Log.d(LOG_TAG, "Reached MainActivity onCreate");
         if (savedInstanceState == null) {
             my_main = new PagerFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, my_main)
                     .commit();
         }
+        ScoresSyncAdapter.initializeSyncAdapter(this);
+
+        //TODO remove FORCE SYNC on app launch
+        if (savedInstanceState == null)
+            ScoresSyncAdapter.syncImmediately(this);
     }
 
 
@@ -76,4 +93,21 @@ public class MainActivity extends ActionBarActivity
         my_main = (PagerFragment) getSupportFragmentManager().getFragment(savedInstanceState,"my_main");
         super.onRestoreInstanceState(savedInstanceState);
     }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Intent intent = getIntent();
+        if (intent != null) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                Utilies.WidgetConfiguration config = Utilies.getWidgetConfiguration(intent);
+                if (config != null) {
+                    if (config.scoreId != null) selected_match_id = config.scoreId;
+                    my_main.selectConfiguration(config);
+                }
+            }
+        }
+    }
+
 }

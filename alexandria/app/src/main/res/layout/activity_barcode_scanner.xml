@@ -1,0 +1,38 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0099cc">
+
+    <it.jaschke.alexandria.CameraPreview.CameraPreview
+        android:id="@+id/cameraPreview" android:layout_width="match_parent"
+        android:layout_height="match_parent" android:keepScreenOn="true" android:gravity="center" />
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:id="@+id/cameraControls" style="?metaButtonBarStyle"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/black_overlay" android:orientation="horizontal"
+            tools:ignore="UselessParent"
+            android:gravity="center">
+
+            <Button android:id="@+id/flashButton" style="@style/CameraButtonSmall"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/flashButtonAuto" />
+
+            <Button android:id="@+id/photoButton" style="@style/CameraButtonBig"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/photoButton" />
+
+            <Button android:id="@+id/cameraButton" style="@style/CameraButtonSmall"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/cameraButtonBack" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

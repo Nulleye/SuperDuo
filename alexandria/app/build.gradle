@@ -22,11 +22,11 @@ android {
     }
     buildTypes {
         release {
-            testCoverageEnabled = true
+            testCoverageEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        debug{
-            testCoverageEnabled = true
+        debug {
+            testCoverageEnabled = false
         }
 
     }
@@ -35,7 +35,9 @@ android {
     }
 }
 
+
 dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
-
+    compile 'com.google.zxing:core:3.2.1'
+    compile 'com.android.support:support-v4:21.0.3'
 }

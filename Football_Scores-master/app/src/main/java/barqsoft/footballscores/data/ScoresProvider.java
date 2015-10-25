@@ -1,12 +1,22 @@
-package barqsoft.footballscores;
+package barqsoft.footballscores.data;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+
+import barqsoft.footballscores.R;
+import barqsoft.footballscores.Utilies;
+import barqsoft.footballscores.widget.DayWidget;
+import barqsoft.footballscores.widget.FootballWidget;
+import barqsoft.footballscores.widget.ScoreWidget;
 
 /**
  * Created by yehya khaled on 2/25/2015.
@@ -156,7 +166,9 @@ public class ScoresProvider extends ContentProvider
                 } finally {
                     db.endTransaction();
                 }
-                getContext().getContentResolver().notifyChange(uri,null);
+                final Context context = getContext();
+                context.getContentResolver().notifyChange(uri, null);
+                notifyWidgets(context);
                 return returncount;
             default:
                 return super.bulkInsert(uri,values);
@@ -167,4 +179,25 @@ public class ScoresProvider extends ContentProvider
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         return 0;
     }
+
+
+    private void notifyWidgets(final Context context) {
+        final AppWidgetManager man = AppWidgetManager.getInstance(context);
+
+        int[] ids = Utilies.cleanWidgets(context,
+                man.getAppWidgetIds(new ComponentName(context, ScoreWidget.class)), Utilies.WIDGET_TYPE_SCORE);
+        if (ids != null) {
+            Intent updateIntent = new Intent();
+            updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            updateIntent.putExtra(FootballWidget.WIDGET_IDS_KEY, ids);
+            context.sendBroadcast(updateIntent);
+        }
+
+        ids = Utilies.cleanWidgets(context,
+                man.getAppWidgetIds(new ComponentName(context, DayWidget.class)), Utilies.WIDGET_TYPE_DAY);
+        if (ids != null)
+            man.notifyAppWidgetViewDataChanged(ids, R.id.scores_list);
+    }
+
+
 }
