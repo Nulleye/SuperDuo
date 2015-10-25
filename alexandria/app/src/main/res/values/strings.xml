@@ -33,6 +33,12 @@
 
     <string name="title_activity_barcode_scanner">Barcode scanner</string>
 
+    <string name="not_available">%s not available</string>
+    <string name="title_text">Title</string>
+    <string name="desc_text">Description</string>
+    <string name="author_text">Author</string>
+    <string name="category_text">Category</string>
+
     <!-- Camera buttons (material typeface) -->
     <string name="photoButton" translatable="false"></string>
     <string name="flashButtonAuto" translatable="false"></string>

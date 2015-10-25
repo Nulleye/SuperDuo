@@ -163,29 +163,40 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         );
     }
 
+
+    protected String getText(final String text, final int textId) {
+        if ((text == null) || text.trim().isEmpty())
+            return getString(R.string.not_available, getString(textId));
+        return text;
+    }
+
+
     @Override
     public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
         if (!data.moveToFirst()) {
             return;
         }
 
-        String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
+        String bookTitle = getText(data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE)),
+                R.string.title_text);
         ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);
 
         String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
 
-        String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
+        String authors = getText(data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR)),
+                R.string.author_text);
         String[] authorsArr = authors.split(",");
         ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
         ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        if(Patterns.WEB_URL.matcher(imgUrl).matches()){
+        if ((imgUrl != null) && (!imgUrl.isEmpty()) && Patterns.WEB_URL.matcher(imgUrl).matches()) {
             new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
             rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
         }
 
-        String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
+        String categories = getText(data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY)),
+                R.string.category_text);
         ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
 
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);

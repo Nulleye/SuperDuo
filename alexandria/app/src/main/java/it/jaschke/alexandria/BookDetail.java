@@ -62,6 +62,9 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
+
+        setRetainInstance(true);
+
         return rootView;
     }
 
@@ -69,10 +72,10 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.book_detail, menu);
-
         MenuItem menuItem = menu.findItem(R.id.action_share);
         shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
     }
+
 
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -86,13 +89,22 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         );
     }
 
+
+    protected String getText(final String text, final int textId) {
+        if ((text == null) || text.trim().isEmpty())
+            return getString(R.string.not_available, getString(textId));
+        return text;
+    }
+
+
     @Override
     public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
         if (!data.moveToFirst()) {
             return;
         }
 
-        bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
+        bookTitle = getText(data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE)),
+                R.string.title_text);
         ((TextView) rootView.findViewById(R.id.fullBookTitle)).setText(bookTitle);
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
@@ -104,20 +116,23 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
         ((TextView) rootView.findViewById(R.id.fullBookSubTitle)).setText(bookSubTitle);
 
-        String desc = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.DESC));
+        String desc = getText(data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.DESC)),
+                R.string.desc_text);
         ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText(desc);
 
-        String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
+        String authors = getText(data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR)),
+                R.string.author_text);
         String[] authorsArr = authors.split(",");
         ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
         ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        if(Patterns.WEB_URL.matcher(imgUrl).matches()){
+        if ((imgUrl != null) && (!imgUrl.isEmpty()) && Patterns.WEB_URL.matcher(imgUrl).matches()) {
             new DownloadImage((ImageView) rootView.findViewById(R.id.fullBookCover)).execute(imgUrl);
             rootView.findViewById(R.id.fullBookCover).setVisibility(View.VISIBLE);
         }
 
-        String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
+        String categories = getText(data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY)),
+                R.string.category_text);
         ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
 
         if(rootView.findViewById(R.id.right_container)!=null){
